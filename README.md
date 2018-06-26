@@ -9,3 +9,5 @@ Unterstützte Mensen:
 - WUEins
 - Bio Mensa U-Boot
 - Mensa Johannstadt
+
+Informationen zur Mensa von: https://openmensa.org/
