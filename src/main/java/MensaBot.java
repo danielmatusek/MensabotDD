@@ -1,6 +1,11 @@
 import mensaApi.MealHandler;
 import var.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.InputMismatchException;
+
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,12 +22,12 @@ public class MensaBot extends TelegramLongPollingBot {
             try {
                 if(message_text.startsWith(Commands.startCommand)) sendGreetings(chat_id);
                 else if(message_text.startsWith(Commands.helpCommand)) sendHelp(chat_id);
-                else if(message_text.startsWith(Commands.alteMensa)) sendMeals(chat_id, 79, Constants.alteMensa);
-                else if(message_text.startsWith(Commands.zeltMensa)) sendMeals(chat_id, 78, Constants.zelt);
-                else if(message_text.startsWith(Commands.siedePunkt)) sendMeals(chat_id, 82, Constants.siedepunkt);
-                else if(message_text.startsWith(Commands.wueins)) sendMeals(chat_id, 85, Constants.wuEins);
-                else if(message_text.startsWith(Commands.biomensa)) sendMeals(chat_id, 88, Constants.biomensa);
-                else if(message_text.startsWith(Commands.johannstadt)) sendMeals(chat_id, 87, Constants.johannstadt);
+                else if(message_text.startsWith(Commands.alteMensa)) sendMeals(chat_id, 79, Constants.alteMensa, message_text);
+                else if(message_text.startsWith(Commands.zeltMensa)) sendMeals(chat_id, 78, Constants.zelt, message_text);
+                else if(message_text.startsWith(Commands.siedePunkt)) sendMeals(chat_id, 82, Constants.siedepunkt, message_text);
+                else if(message_text.startsWith(Commands.wueins)) sendMeals(chat_id, 85, Constants.wuEins, message_text);
+                else if(message_text.startsWith(Commands.biomensa)) sendMeals(chat_id, 88, Constants.biomensa, message_text);
+                else if(message_text.startsWith(Commands.johannstadt)) sendMeals(chat_id, 87, Constants.johannstadt, message_text);
                 else if(message_text.startsWith(Commands.grillpep)) sendNoMenuMessage(chat_id, Constants.grillpep, Constants.linkGrillCube);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -30,14 +35,34 @@ public class MensaBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMeals(long chat_id, int mensaId, String mensaName) throws Exception {
+    public void sendMeals(long chat_id, int mensaId, String mensaName, String messageText) throws Exception {
 
         MealHandler mealHandler = new MealHandler();
 
         SendMessage message = new SendMessage()
                 .setChatId(chat_id).enableMarkdown(true);
+        String[] splitMessage = messageText.split("\\s+");
+        if(splitMessage.length > 1){
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            dateFormat.setLenient(false);
+            try {
+                dateFormat.parse(splitMessage[1].trim());
+            } catch (ParseException pe) {{
+                    System.out.println("EXCEPTION: !! WARNING ES BRENNT wrong input format, use yyyy-mm-dd");
+                    return;
+                }
+            }
+            Date date = dateFormat.parse(splitMessage[1]);
+            System.out.println(date);
+            String datum = dateFormat.format(date);
+            execute(message.setText(mealHandler.getMealsForSending(mensaId, mensaName, datum)));
 
-        execute(message.setText(mealHandler.getMealsForSending(mensaId, mensaName)));
+        } else {
+            Date date  = java.util.Calendar.getInstance().getTime();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String datum = sdf.format(date);
+            execute(message.setText(mealHandler.getMealsForSending(mensaId, mensaName, datum)));
+        }
     }
 
     public void sendGreetings(long chat_id) {

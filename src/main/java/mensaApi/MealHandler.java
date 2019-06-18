@@ -19,15 +19,11 @@ public class MealHandler {
         openMensaConn = OpenMensaConn.getInstance();
     }
 
-    public ArrayList<String> getMeals(int mensaId) throws Exception {
+    public ArrayList<String> getMeals(int mensaId, String datum) throws Exception {
 
         ArrayList<String> meals = new ArrayList<>();
 
         if (isCanteenOpened(mensaId)) {
-
-            Date date  = java.util.Calendar.getInstance().getTime();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String datum = sdf.format(date);
 
             JSONArray todaysMeals = new JSONArray(openMensaConn.getResponseString(
                     openMensaConn.openConnection(openMensa_canteens + "/" + mensaId + "/days/te" + datum + "/meals")));
@@ -64,9 +60,9 @@ public class MealHandler {
         else return true;
     }
 
-    public String getMealsForSending(int mensaId, String mensaName) throws Exception {
+    public String getMealsForSending(int mensaId, String mensaName, String date) throws Exception {
 
-        ArrayList meals = getMeals(mensaId);
+        ArrayList meals = getMeals(mensaId, date);
         String output = Constants.todayMenu + mensaName + ": \n\n";
 
         for(int i = 0; i < meals.size(); i++){
